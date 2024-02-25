@@ -75,7 +75,7 @@ def bfs(initial: T, goal_test: Callable[[T], bool], successors:
       current_node: Node[T] = frontier.pop()
       current_state: T = current_node.state
       # se encontrarmos o objetivo, terminamos
-      if goal_test():
+      if goal_test(current_state):
        return current_node
       # verifica para onde podemos ir em seguida e que ainda não tenha sido explorado
       for child in successors(current_state):

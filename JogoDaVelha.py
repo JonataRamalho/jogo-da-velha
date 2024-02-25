@@ -1,13 +1,14 @@
 import copy
 from queue import Queue
-from SearchBfs import bfs
-from typing import List, Optional
+from SearchBfs import bfs, node_to_path
+# from typing import List, Optional
 
 
 class TicTacToe:
     def __init__(self):
         self.board = [[' ' for _ in range(3)] for _ in range(3)]
         self.player = 'X'
+        self.position = ()
 
     def print_board(self):
         for row in self.board:
@@ -18,6 +19,16 @@ class TicTacToe:
         if self.board[row][col] == ' ':
             self.board[row][col] = self.player
             self.player = 'X' if self.player == 'O' else 'O'
+            return True
+        return False
+    
+    def make_move_test(self, row, col):
+        if self.board[row][col] == ' ':
+            self.board[row][col] = self.player
+            
+            if(self.player == 'X'):
+                self.player == '0'
+            
             return True
         return False
 
@@ -48,21 +59,23 @@ class TicTacToe:
                     empty_cells.append((i, j))
         return empty_cells
 
-    def goal_test(self):
-        return self.check_winner() == "X"
-  
+    def goal_test(self, current_state):
+        if self.player == "O" and current_state != self:
+            return True
+        return False
+
     def successors(self, current_state):
         successors_list = []
 
         if not self.is_full():
             empty_cells = self.get_empty_cells()
             for i, j in empty_cells:
-                new_game = self
-                new_game.make_move(i, j)
+                new_game = copy.deepcopy(self)
+                # new_game.make_move(i, j)
+                new_game.position = (i, j)
                 successors_list.append(new_game)
 
         return successors_list
-
         
 def bfs_chat(game):
     queue = Queue()
@@ -116,12 +129,12 @@ def main():
 
 
         if bfs_path:
-            print(bfs_path)
-            for move in bfs_path:
-                game.make_move(*move)
-                game.print_board()
-                print()
-                break
+            path = node_to_path(bfs_path)
+            for move in path:
+                if len(move.position) > 0:
+                    game.make_move(*move.position)
+                    game.print_board()
+                    print()
         else:
             print("No winning move found for the computer.")
             break
