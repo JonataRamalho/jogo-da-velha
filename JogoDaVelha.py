@@ -21,16 +21,6 @@ class TicTacToe:
             self.player = 'X' if self.player == 'O' else 'O'
             return True
         return False
-    
-    def make_move_test(self, row, col):
-        if self.board[row][col] == ' ':
-            self.board[row][col] = self.player
-            
-            if(self.player == 'X'):
-                self.player == '0'
-            
-            return True
-        return False
 
     def check_winner(self):
         for i in range(3):
@@ -59,10 +49,40 @@ class TicTacToe:
                     empty_cells.append((i, j))
         return empty_cells
 
+    # def goal_test(self, current_state):
+    #     if self.player == "O" and current_state != self:
+    #         return True
+    #     return False
+    
+
     def goal_test(self, current_state):
         if self.player == "O" and current_state != self:
-            return True
+            lista = current_state.board[1][:] 
+            try:
+                espaco_vazio = lista.index(' ')
+            except: 
+                espaco_vazio = False
+
+            if lista.count('X') == 2 and espaco_vazio:
+                posicao_vazia_prioritaria = lista.index(' ')
+                if (1, posicao_vazia_prioritaria) == current_state.position:
+                    return True
+            else:
+                return True
         return False
+            
+
+
+        # for i in range(3):
+        #     if self.board[i][0] == self.board[i][1] == self.board[i][2] != ' ':
+        #         return self.board[i][0]
+        #     if self.board[0][i] == self.board[1][i] == self.board[2][i] != ' ':
+        #         return self.board[0][i]
+        # if self.board[0][0] == self.board[1][1] == self.board[2][2] != ' ':
+        #     return self.board[0][0]
+        # if self.board[0][2] == self.board[1][1] == self.board[2][0] != ' ':
+        #     return self.board[0][2]
+
 
     def successors(self, current_state):
         successors_list = []
@@ -71,7 +91,7 @@ class TicTacToe:
             empty_cells = self.get_empty_cells()
             for i, j in empty_cells:
                 new_game = copy.deepcopy(self)
-                # new_game.make_move(i, j)
+                new_game.make_move(i, j)
                 new_game.position = (i, j)
                 successors_list.append(new_game)
 
