@@ -57,33 +57,38 @@ class TicTacToe:
 
     def goal_test(self, current_state):
         if self.player == "O" and current_state != self:
-            lista = current_state.board[1][:] 
-            try:
-                espaco_vazio = lista.index(' ')
-            except: 
-                espaco_vazio = False
 
-            if lista.count('X') == 2 and espaco_vazio:
-                posicao_vazia_prioritaria = lista.index(' ')
-                if (1, posicao_vazia_prioritaria) == current_state.position:
-                    return True
-            else:
-                return True
+            for i in range(3):
+                #Verificar linhas
+                lista = current_state.board[i][:] 
+                try:
+                    idx_espaco_vazio = lista.index(' ')
+                except: 
+                    idx_espaco_vazio = None
+                
+                if lista.count('X') == 2 and idx_espaco_vazio: #alterado para >= 0 pois quando o indice for ZERO o python entende como False.
+                    if (i, idx_espaco_vazio) == current_state.position:
+                        return True
+                    return False
+                
+                # #Verificar colunas - Não está funcional
+                # for j in range(3):
+                #     coluna = [current_state.board[i][j] for i in range(3)]
+                #     try:
+                #         idx_espaco_vazio = coluna.index(' ')
+                #     except: 
+                #         idx_espaco_vazio = None
+                #     if coluna.count('X') == 2 and idx_espaco_vazio:
+                #         if (idx_espaco_vazio, i) == current_state.position:
+                #             return True
+
+                #         return False
+                    
+            return True
+                    
         return False
-            
-
-
-        # for i in range(3):
-        #     if self.board[i][0] == self.board[i][1] == self.board[i][2] != ' ':
-        #         return self.board[i][0]
-        #     if self.board[0][i] == self.board[1][i] == self.board[2][i] != ' ':
-        #         return self.board[0][i]
-        # if self.board[0][0] == self.board[1][1] == self.board[2][2] != ' ':
-        #     return self.board[0][0]
-        # if self.board[0][2] == self.board[1][1] == self.board[2][0] != ' ':
-        #     return self.board[0][2]
-
-
+    
+    
     def successors(self, current_state):
         successors_list = []
 

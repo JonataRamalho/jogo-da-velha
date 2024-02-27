@@ -79,9 +79,9 @@ def bfs(initial: T, goal_test: Callable[[T], bool], successors:
        return current_node
       # verifica para onde podemos ir em seguida e que ainda não tenha sido explorado
       for child in successors(current_state):
-        print('antes')
+        #print('antes')
         if child in explored: # ignora os filhos que já tenham sido explorados
-          print("Depois - Oloco meu")
+          #print("Depois - Oloco meu")
           continue
         explored.add(child)
         frontier.push(Node(child, current_node))
