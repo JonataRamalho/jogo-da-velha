@@ -1,7 +1,6 @@
 import copy
 from queue import Queue
 from SearchBfs import bfs, node_to_path
-# from typing import List, Optional
 
 
 class TicTacToe:
@@ -56,17 +55,10 @@ class TicTacToe:
                     empty_cells.append((i, j))
         return empty_cells
 
-    # def goal_test(self, current_state):
-    #     if self.player == "O" and current_state != self:
-    #         return True
-    #     return False
-    
-
     def goal_test(self, current_state):
         if self.player == "O" and current_state != self:
 
             for i in range(3):
-                #Verificar linhas
                 row_info = current_state.board[i][:] 
                 try:
                     position_with_empty_space = row_info.index(' ')
@@ -145,33 +137,35 @@ def main():
     game = TicTacToe()
     game.print_board()
 
-    while not game.is_full() and not game.check_winner():
-        row = int(input("Enter row (0, 1, 2): "))
-        col = int(input("Enter column (0, 1, 2): "))
+    total_moves = 0
+
+    while True:
+        row = int(input("Insira a linha (0, 1, 2): "))
+        col = int(input("Insira a coluna (0, 1, 2): "))
         
         if not (0 <= row <= 2) or not (0 <= col <= 2):
-            print("Invalid input. Please enter numbers between 0 and 2.")
+            print("Entrada inválida. Digite números entre 0 e 2.")
             continue
         
         if not game.make_move(row, col):
-            print("Invalid move. Try again.")
+            print("Movimento inválido. Tente novamente.")
             continue
         
         game.print_board()
         
-        if game.check_winner():
-            print("You won!")
+        winner = game.check_winner()
+        if winner:
+            print(f"{winner} ganhou!")
             break
         
-        if game.is_full():
-            print("It's a draw!")
+        total_moves += 1
+        if total_moves == 3 and not winner:
+            print("É um empate!")
             break
         
-        print("Computer's turn:")
+        print("É a vez do computador:")
 
         bfs_path = bfs(game, game.goal_test, game.successors)
-        # bfs_path = bfs_chat(game)
-
 
         if bfs_path:
             path = node_to_path(bfs_path)
@@ -181,8 +175,9 @@ def main():
                     game.print_board()
                     print()
         else:
-            print("No winning move found for the computer.")
+            print("Não foi encontrada nenhuma jogada para o computador.")
             break
+
 
 if __name__ == "__main__":
     main()
