@@ -9,6 +9,13 @@ class TicTacToe:
         self.board = [[' ' for _ in range(3)] for _ in range(3)]
         self.player = 'X'
         self.position = ()
+    
+    def __eq__(self, other):
+        return isinstance(other, TicTacToe) and self.board == other.board
+
+    def __hash__(self):
+        return hash(tuple(tuple(row) for row in self.board))
+
 
     def print_board(self):
         for row in self.board:
@@ -60,30 +67,43 @@ class TicTacToe:
 
             for i in range(3):
                 #Verificar linhas
-                lista = current_state.board[i][:] 
+                row_info = current_state.board[i][:] 
                 try:
-                    idx_espaco_vazio = lista.index(' ')
+                    position_with_empty_space = row_info.index(' ')
                 except: 
-                    idx_espaco_vazio = None
+                    position_with_empty_space = None
                 
-                if lista.count('X') == 2 and idx_espaco_vazio: #alterado para >= 0 pois quando o indice for ZERO o python entende como False.
-                    if (i, idx_espaco_vazio) == current_state.position:
+                if row_info.count('X') == 2 and position_with_empty_space: #alterado para >= 0 pois quando o indice for ZERO o python entende como False.
+                    if (i, position_with_empty_space) == current_state.position:
                         return True
                     return False
                 
-                # #Verificar colunas - Não está funcional
-                # for j in range(3):
-                #     coluna = [current_state.board[i][j] for i in range(3)]
-                #     try:
-                #         idx_espaco_vazio = coluna.index(' ')
-                #     except: 
-                #         idx_espaco_vazio = None
-                #     if coluna.count('X') == 2 and idx_espaco_vazio:
-                #         if (idx_espaco_vazio, i) == current_state.position:
-                #             return True
+                x_counter = 0 
+                keep_searching = True
 
-                #         return False
-                    
+                while keep_searching:
+                    for j in range(3):
+                        LIMIT = 2
+                        position_with_empty_space = None
+                        column_info = current_state.board[j][i]
+
+                        if(column_info == 'X'):
+                            x_counter += 1
+                            position_with_empty_space = None
+                        else:
+                            position_with_empty_space = j
+
+                        if (x_counter >= 2 and position_with_empty_space):
+                            keep_searching = False
+
+                            if (position_with_empty_space, i) == current_state.position:
+                                return True
+                            
+                            return False
+                        
+                        if(j == LIMIT and x_counter < 2):
+                            keep_searching = False
+
             return True
                     
         return False
