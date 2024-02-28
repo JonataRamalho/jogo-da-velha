@@ -65,27 +65,30 @@ class TicTacToe:
                 except: 
                     position_with_empty_space = None
                 
-                if row_info.count('X') == 2 and position_with_empty_space: #alterado para >= 0 pois quando o indice for ZERO o python entende como False.
+                if row_info.count('X') == 2 and position_with_empty_space != None:
                     if (i, position_with_empty_space) == current_state.position:
                         return True
                     return False
                 
-                x_counter = 0 
+                x_counter = 0
+                empty_counter = 0
                 keep_searching = True
-
+                
                 while keep_searching:
+                    position_with_empty_space = None
                     for j in range(3):
                         LIMIT = 2
-                        position_with_empty_space = None
-                        column_info = current_state.board[j][i]
+                        column_info = self.board[j][i]
+                        #column_info = current_state.board[j][i]
 
                         if(column_info == 'X'):
                             x_counter += 1
-                            position_with_empty_space = None
-                        else:
-                            position_with_empty_space = j
 
-                        if (x_counter >= 2 and position_with_empty_space):
+                        elif(column_info == ' '):
+                            position_with_empty_space = j
+                            empty_counter+=1
+
+                        if (x_counter == 2 and position_with_empty_space != None):
                             keep_searching = False
 
                             if (position_with_empty_space, i) == current_state.position:
@@ -93,9 +96,37 @@ class TicTacToe:
                             
                             return False
                         
-                        if(j == LIMIT and x_counter < 2):
+                        if(j == LIMIT and x_counter <= 2):
                             keep_searching = False
 
+                    x_counter = 0
+            
+            #Verifica 1a diagonal 
+            diagonal_1 = [self.board[0][0], self.board[1][1],self.board[2][2]]
+            posicoes_diagonal1 = {'0': (0,0), '1': (1,1), '2': (2,2)}
+            try:
+                position_with_empty_space = diagonal_1.index(' ')
+            except: 
+                position_with_empty_space = None
+                
+            if diagonal_1.count('X') == 2 and position_with_empty_space != None:
+                if posicoes_diagonal1[f'{position_with_empty_space}'] == current_state.position:
+                    return True
+                return False
+            
+            #Verifica 2a diagonal 
+            diagonal_2 = [self.board[0][2], self.board[1][1],self.board[2][0]]
+            posicoes_diagonal2 = {'0': (0,2), '1': (1,1), '2': (2,0)}
+            try:
+                position_with_empty_space = diagonal_2.index(' ')
+            except: 
+                position_with_empty_space = None
+                
+            if diagonal_2.count('X') == 2 and position_with_empty_space != None:
+                if posicoes_diagonal2[f'{position_with_empty_space}'] == current_state.position:
+                    return True
+                return False
+            
             return True
                     
         return False
@@ -150,18 +181,14 @@ def main():
         if not game.make_move(row, col):
             print("Movimento inválido. Tente novamente.")
             continue
-        
+        else:
+            total_moves += 1
+
         game.print_board()
         
         winner = game.check_winner()
         if winner:
             print(f"{winner} ganhou!")
-            break
-        
-        total_moves += 1
-        # Limite para empate - precisa melhorar
-        if total_moves == 3 and not winner:
-            print("É um empate!")
             break
         
         print("É a vez do computador:")
@@ -175,6 +202,12 @@ def main():
                     game.make_move(*move.position)
                     game.print_board()
                     print()
+                    total_moves+=1
+                    
+            # Limite para empate
+            if total_moves == 9 and not winner:
+                print("É um empate!")
+                break
         else:
             print("Não foi encontrada nenhuma jogada para o computador.")
             break
