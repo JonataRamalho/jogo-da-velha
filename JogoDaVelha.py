@@ -1,13 +1,21 @@
 import copy
 from queue import Queue
-from SearchBfs import bfs
-from typing import List, Optional
+from SearchBfs import bfs, node_to_path
+# from typing import List, Optional
 
 
 class TicTacToe:
     def __init__(self):
         self.board = [[' ' for _ in range(3)] for _ in range(3)]
         self.player = 'X'
+        self.position = ()
+    
+    def __eq__(self, other):
+        return isinstance(other, TicTacToe) and self.board == other.board
+
+    def __hash__(self):
+        return hash(tuple(tuple(row) for row in self.board))
+
 
     def print_board(self):
         for row in self.board:
@@ -48,21 +56,71 @@ class TicTacToe:
                     empty_cells.append((i, j))
         return empty_cells
 
-    def goal_test(self):
-        return self.check_winner() == "X"
-  
+    # def goal_test(self, current_state):
+    #     if self.player == "O" and current_state != self:
+    #         return True
+    #     return False
+    
+
+    def goal_test(self, current_state):
+        if self.player == "O" and current_state != self:
+
+            for i in range(3):
+                #Verificar linhas
+                row_info = current_state.board[i][:] 
+                try:
+                    position_with_empty_space = row_info.index(' ')
+                except: 
+                    position_with_empty_space = None
+                
+                if row_info.count('X') == 2 and position_with_empty_space: #alterado para >= 0 pois quando o indice for ZERO o python entende como False.
+                    if (i, position_with_empty_space) == current_state.position:
+                        return True
+                    return False
+                
+                x_counter = 0 
+                keep_searching = True
+
+                while keep_searching:
+                    for j in range(3):
+                        LIMIT = 2
+                        position_with_empty_space = None
+                        column_info = current_state.board[j][i]
+
+                        if(column_info == 'X'):
+                            x_counter += 1
+                            position_with_empty_space = None
+                        else:
+                            position_with_empty_space = j
+
+                        if (x_counter >= 2 and position_with_empty_space):
+                            keep_searching = False
+
+                            if (position_with_empty_space, i) == current_state.position:
+                                return True
+                            
+                            return False
+                        
+                        if(j == LIMIT and x_counter < 2):
+                            keep_searching = False
+
+            return True
+                    
+        return False
+    
+    
     def successors(self, current_state):
         successors_list = []
 
         if not self.is_full():
             empty_cells = self.get_empty_cells()
             for i, j in empty_cells:
-                new_game = self
+                new_game = copy.deepcopy(self)
                 new_game.make_move(i, j)
+                new_game.position = (i, j)
                 successors_list.append(new_game)
 
         return successors_list
-
         
 def bfs_chat(game):
     queue = Queue()
@@ -116,12 +174,12 @@ def main():
 
 
         if bfs_path:
-            print(bfs_path)
-            for move in bfs_path:
-                game.make_move(*move)
-                game.print_board()
-                print()
-                break
+            path = node_to_path(bfs_path)
+            for move in path:
+                if len(move.position) > 0:
+                    game.make_move(*move.position)
+                    game.print_board()
+                    print()
         else:
             print("No winning move found for the computer.")
             break
