@@ -159,6 +159,7 @@ def main():
             break
         
         total_moves += 1
+        # Limite para empate - precisa melhorar
         if total_moves == 3 and not winner:
             print("É um empate!")
             break
