@@ -1,13 +1,20 @@
 import copy
 from queue import Queue
-from SearchBfs import bfs
-from typing import List, Optional
+from SearchBfs import bfs, node_to_path
 
 
 class TicTacToe:
     def __init__(self):
         self.board = [[' ' for _ in range(3)] for _ in range(3)]
         self.player = 'X'
+        self.position = ()
+    
+    def __eq__(self, other):
+        return isinstance(other, TicTacToe) and self.board == other.board
+
+    def __hash__(self):
+        return hash(tuple(tuple(row) for row in self.board))
+
 
     def print_board(self):
         for row in self.board:
@@ -48,21 +55,95 @@ class TicTacToe:
                     empty_cells.append((i, j))
         return empty_cells
 
-    def goal_test(self):
-        return self.check_winner() == "X"
-  
+    def goal_test(self, current_state):
+        if self.player == "O" and current_state != self:
+
+            for i in range(3):
+                row_info = current_state.board[i][:] 
+                try:
+                    position_with_empty_space = row_info.index(' ')
+                except: 
+                    position_with_empty_space = None
+                
+                if row_info.count('X') == 2 and position_with_empty_space != None:
+                    if (i, position_with_empty_space) == current_state.position:
+                        return True
+                    return False
+                
+                x_counter = 0
+                empty_counter = 0
+                keep_searching = True
+                
+                while keep_searching:
+                    position_with_empty_space = None
+                    for j in range(3):
+                        LIMIT = 2
+                        column_info = self.board[j][i]
+                        #column_info = current_state.board[j][i]
+
+                        if(column_info == 'X'):
+                            x_counter += 1
+
+                        elif(column_info == ' '):
+                            position_with_empty_space = j
+                            empty_counter+=1
+
+                        if (x_counter == 2 and position_with_empty_space != None):
+                            keep_searching = False
+
+                            if (position_with_empty_space, i) == current_state.position:
+                                return True
+                            
+                            return False
+                        
+                        if(j == LIMIT and x_counter <= 2):
+                            keep_searching = False
+
+                    x_counter = 0
+            
+            #Verifica 1a diagonal 
+            diagonal_1 = [self.board[0][0], self.board[1][1],self.board[2][2]]
+            posicoes_diagonal1 = {'0': (0,0), '1': (1,1), '2': (2,2)}
+            try:
+                position_with_empty_space = diagonal_1.index(' ')
+            except: 
+                position_with_empty_space = None
+                
+            if diagonal_1.count('X') == 2 and position_with_empty_space != None:
+                if posicoes_diagonal1[f'{position_with_empty_space}'] == current_state.position:
+                    return True
+                return False
+            
+            #Verifica 2a diagonal 
+            diagonal_2 = [self.board[0][2], self.board[1][1],self.board[2][0]]
+            posicoes_diagonal2 = {'0': (0,2), '1': (1,1), '2': (2,0)}
+            try:
+                position_with_empty_space = diagonal_2.index(' ')
+            except: 
+                position_with_empty_space = None
+                
+            if diagonal_2.count('X') == 2 and position_with_empty_space != None:
+                if posicoes_diagonal2[f'{position_with_empty_space}'] == current_state.position:
+                    return True
+                return False
+            
+            return True
+                    
+        return False
+    
+    
     def successors(self, current_state):
         successors_list = []
 
         if not self.is_full():
             empty_cells = self.get_empty_cells()
             for i, j in empty_cells:
-                new_game = self
+                new_game = copy.deepcopy(self)
                 new_game.make_move(i, j)
+                new_game.position = (i, j)
                 successors_list.append(new_game)
 
         return successors_list
-
         
 def bfs_chat(game):
     queue = Queue()
@@ -87,44 +168,50 @@ def main():
     game = TicTacToe()
     game.print_board()
 
-    while not game.is_full() and not game.check_winner():
-        row = int(input("Enter row (0, 1, 2): "))
-        col = int(input("Enter column (0, 1, 2): "))
+    total_moves = 0
+
+    while True:
+        row = int(input("Insira a linha (0, 1, 2): "))
+        col = int(input("Insira a coluna (0, 1, 2): "))
         
         if not (0 <= row <= 2) or not (0 <= col <= 2):
-            print("Invalid input. Please enter numbers between 0 and 2.")
+            print("Entrada inválida. Digite números entre 0 e 2.")
             continue
         
         if not game.make_move(row, col):
-            print("Invalid move. Try again.")
+            print("Movimento inválido. Tente novamente.")
             continue
-        
+        else:
+            total_moves += 1
+
         game.print_board()
         
-        if game.check_winner():
-            print("You won!")
+        winner = game.check_winner()
+        if winner:
+            print(f"{winner} ganhou!")
             break
         
-        if game.is_full():
-            print("It's a draw!")
-            break
-        
-        print("Computer's turn:")
+        print("É a vez do computador:")
 
         bfs_path = bfs(game, game.goal_test, game.successors)
-        # bfs_path = bfs_chat(game)
-
 
         if bfs_path:
-            print(bfs_path)
-            for move in bfs_path:
-                game.make_move(*move)
-                game.print_board()
-                print()
+            path = node_to_path(bfs_path)
+            for move in path:
+                if len(move.position) > 0:
+                    game.make_move(*move.position)
+                    game.print_board()
+                    print()
+                    total_moves+=1
+                    
+            # Limite para empate
+            if total_moves == 9 and not winner:
+                print("É um empate!")
                 break
         else:
-            print("No winning move found for the computer.")
+            print("Não foi encontrada nenhuma jogada para o computador.")
             break
+
 
 if __name__ == "__main__":
     main()
